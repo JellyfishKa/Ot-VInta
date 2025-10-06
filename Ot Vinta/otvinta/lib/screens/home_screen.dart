@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import 'package:otvinta/models/request_model.dart';
 import 'package:otvinta/models/service_model.dart';
 import 'package:otvinta/screens/create_request_screen.dart';
+import 'package:intl/intl.dart';
 import 'services_screen.dart';
 import 'requests_screen.dart';
 import 'benefits_screen.dart';
@@ -66,12 +66,17 @@ class _HomeScreenState extends State<HomeScreen> {
 
   /// Добавляет новую заявку в начало списка.
   void _addRequest(ServiceModel service) {
+    // Создаем форматтер для даты в виде "день.месяц.год"
+    final DateFormat formatter = DateFormat('dd.MM.yyyy');
+    // Получаем текущую дату и форматируем ее в нужную строку
+    final String formattedDate = formatter.format(DateTime.now());
+
     setState(() {
       _requests.insert(
         0,
         RequestModel(
           title: service.title,
-          date: '06.10.2025', // TODO: Заменить на реальную дату
+          date: formattedDate, // <-- ИСПОЛЬЗУЕМ РЕАЛЬНУЮ ДАТУ
           status: RequestStatus.pending,
         ),
       );
