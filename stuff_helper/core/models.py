@@ -7,7 +7,9 @@ class User(AbstractUser):
     employee_id = models.CharField(
         max_length=20,
         unique=True,
-        verbose_name="Employee ID"
+        verbose_name="Employee ID",
+        blank=True, 
+        null=True,
     )
     department = models.CharField(
         max_length=100,
