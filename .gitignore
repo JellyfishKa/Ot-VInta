@@ -1,34 +1,113 @@
-# Miscellaneous
-*.class
-*.log
-*.pyc
-*.swp
-.DS_Store
-.atom/
-.buildlog/
-.history
-.svn/
+# ===================================================================
+# Consolidated .gitignore for Flutter (Mobile) and Django (Backend)
+# ===================================================================
+# This file is structured to cover IDEs, OS-specific files,
+# the Flutter frontend, and the Python/Django backend.
 
-# IntelliJ & Android Studio
+# ===================================================================
+# IDE / Editor / OS Specific
+# ===================================================================
+
+# General
+*.log
+*.bak
+*.swp
+*.swo
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+
+# IntelliJ, Android Studio, PyCharm
 .idea/
 *.iml
-*.ipr
 *.iws
-out/
-build/
 
 # Visual Studio Code
-.vscode/
+# Ignore everything in .vscode except for project-specific settings
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.history/
 
-# Flutter/Dart
+
+# ===================================================================
+# Flutter / Dart (Mobile Frontend)
+# ===================================================================
+
+# General Flutter/Dart
 .dart_tool/
-.flutter-plugins
-.flutter-plugins-dependencies
 .packages
 .pub-cache/
 .pub/
-/build/
+build/
 
-# Generated plugins
+# Secret files
+# These should never be versioned. Each developer gets their own.
 android/key.properties
+android/app/google-services.json
+ios/Runner/GoogleService-Info.plist
+ios/Flutter/App.framework
+
+# Generated plugin files
+.flutter-plugins
+.flutter-plugins-dependencies
 ios/Runner/GeneratedPluginRegistrant.*
+
+
+# ===================================================================
+# Python / Django (Backend)
+# ===================================================================
+
+# Virtual Environments
+# Never commit your virtual environment
+.env
+.venv
+env/
+venv/
+ENV/
+
+# Python artifacts
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+.pytest_cache/
+
+# User-uploaded content
+# This folder is managed by Django and should not be in version control
+media/
+
+# Static files collected by collectstatic
+# This folder is generated during deployment
+staticfiles/
+
+# Database files
+# The production database is on Render. This is only for local dev.
+db.sqlite3
+db.sqlite3-journal
+
+# Distribution / packaging
+dist/
+dist-packages/
+*.egg-info/
+.eggs/
+*.egg
+wheels/
+*.whl
+
+# Test & coverage reports
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints
+
+# MyPy cache
+.mypy_cache/
