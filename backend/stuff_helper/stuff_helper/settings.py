@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 import os
 from pathlib import Path
 
+import dj_database_url
 import load_dotenv
 
 
@@ -82,15 +83,24 @@ WSGI_APPLICATION = 'stuff_helper.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+# Non-prod code
+# DATABASES = {
+#     'default': {
+#         'ENGINE' : 'django.db.backends.postgresql',
+#         'NAME': os.getenv("POSTGRES_NAME", "postgres_db"),
+#         'USER': os.getenv("POSTGRES_USER", "postgres"),
+#         'PASSWORD': os.getenv("POSTGRES_PASSWORD", "postgres"),
+#         'HOST' : os.getenv("POSTGRES_HOST", "localhost"),
+#         'POSTGRES_PORT' : os.getenv("POSTGRES_PORT", "5432"),
+#     }
+# }
+
 DATABASES = {
-    'default': {
-        'ENGINE' : 'django.db.backends.postgresql',
-        'NAME': os.getenv("POSTGRES_NAME", "postgres_db"),
-        'USER': os.getenv("POSTGRES_USER", "postgres"),
-        'PASSWORD': os.getenv("POSTGRES_PASSWORD", "postgres"),
-        'HOST' : os.getenv("POSTGRES_HOST", "localhost"),
-        'POSTGRES_PORT' : os.getenv("POSTGRES_PORT", "5432"),
-    }
+    'default': dj_database_url.config(
+        default=os.getenv('POSTGRES_HOST'),
+        conn_max_age=600,
+        ssl_require=True
+    )
 }
 
 AUTH_USER_MODEL = "core.User"
