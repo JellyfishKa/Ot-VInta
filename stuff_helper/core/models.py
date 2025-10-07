@@ -2,53 +2,75 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 
-# Create your models here.
 class User(AbstractUser):
-    employee_id = models.CharField(
-        max_length=20,
+    employee_id = models.IntegerField(
         unique=True,
         verbose_name="Employee ID",
-        blank=True, 
+        blank=True,
         null=True,
     )
     department = models.CharField(
         max_length=100,
         verbose_name="Department"
     )
-    position = models.CharField(
-        max_length=100,
-        verbose_name="Position"
-    )
+
     class Meta:
         verbose_name = "Employee"
         verbose_name_plural = "Employees"
         ordering = ["employee_id"]
 
     def __str__(self):
-        return f"{self.get_full_name()} ({self.employee_id})"
-    
+        return f"{self.username} ({self.employee_id})"
+
+
+class Category(models.Model):
+    id = models.IntegerField(
+        primary_key=True,
+        unique=True,
+        verbose_name="Category ID",
+    )
+    name = models.CharField(
+        max_length=50,
+        verbose_name="Category Name",
+    )
+
+    class Meta:
+        verbose_name = "Category"
+        verbose_name_plural = "Categories"
+        ordering = ["id"]
+
+    def __str__(self):
+        return self.name
+
+
 class Services(models.Model):
+    id = models.IntegerField(
+        primary_key=True,
+        unique=True,
+        verbose_name="Service's ID",
+    )
     title = models.CharField(
         max_length=300,
         blank=False,
         null=False,
-    )
-    title = models.CharField(
-        max_length=255,
         verbose_name="Title"
     )
     description = models.TextField(
         blank=True,
         verbose_name="Description"
     )
-    category = models.CharField(
-        max_length=100,
-        verbose_name="Category"
+    category = models.ForeignKey(
+        to=Category,
+        verbose_name="Category",
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
     )
     is_active = models.BooleanField(
         default=True,
         verbose_name="Is Active"
     )
+
     class Meta:
         verbose_name = "Service"
         verbose_name_plural = "Services"
@@ -56,6 +78,7 @@ class Services(models.Model):
 
     def __str__(self):
         return self.title
+
 
 class Benefit(models.Model):
     title = models.CharField(
@@ -66,9 +89,12 @@ class Benefit(models.Model):
         blank=True,
         verbose_name="Description"
     )
-    category = models.CharField(
-        max_length=100,
-        verbose_name="Category"
+    category = models.ForeignKey(
+        to=Category,
+        verbose_name="Category",
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
     )
     is_active = models.BooleanField(
         default=True,
