@@ -1,6 +1,3 @@
-// Необходим для jsonEncode/jsonDecode
-
-// Enum для статусов остался без изменений
 enum RequestStatus {
   approved('Одобрено'),
   inProgress('В работе'),
@@ -9,34 +6,47 @@ enum RequestStatus {
 
   const RequestStatus(this.displayName);
   final String displayName;
+  
+  // Вспомогательный метод для получения статуса из строки от бэкенда
+  static RequestStatus fromString(String statusString) {
+    return RequestStatus.values.firstWhere(
+      (e) => e.name.toLowerCase() == statusString.toLowerCase(),
+      orElse: () => RequestStatus.pending, // Значение по умолчанию, если статус не найден
+    );
+  }
 }
 
 class RequestModel {
-  final String id; // Добавляем уникальный ID
+  final String id; // ID теперь обязателен и приходит с сервера
   final String title;
-  final String date;
+  final String date; 
   final RequestStatus status;
 
   RequestModel({
+    required this.id, // <-- Изменено
     required this.title,
     required this.date,
     required this.status,
-  }) : id = DateTime.now().millisecondsSinceEpoch.toString(); // Генерируем ID на основе времени
+  }); // Генерацию ID убрали
 
-  // НОВЫЙ МЕТОД: Превращает объект RequestModel в Map<String, dynamic>
+  // toJson нужен, только если мы отправляем ПОЛНУЮ модель на сервер. 
+  // Обычно для создания мы отправляем другой набор полей (например, только service_id).
   Map<String, dynamic> toJson() {
     return {
       'id': id,
       'title': title,
-      'date': date,
-      'status': status.name, // Сохраняем имя enum, например 'approved'
+      'date': date, // Убедитесь, что отправляете в формате, который ждет сервер
+      'status': status.name,
     };
   }
 
-  // НОВЫЙ КОНСТРУКТОР: Создает объект RequestModel из Map<String, dynamic>
-  RequestModel.fromJson(Map<String, dynamic> json)
-      : id = json['id'],
-        title = json['title'],
-        date = json['date'],
-        status = RequestStatus.values.firstWhere((e) => e.name == json['status']);
+  factory RequestModel.fromJson(Map<String, dynamic> json) {
+
+    return RequestModel(
+      id: json['id'].toString(), // Преобразуем в строку на всякий случай
+      title: json['title'],
+      date: json['date'], // Или используйте formattedDate, если парсите дату
+      status: RequestStatus.fromString(json['status']),
+    );
+  }
 }

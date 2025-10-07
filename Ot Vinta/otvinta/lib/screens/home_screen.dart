@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:otvinta/models/request_model.dart';
 import 'package:otvinta/models/service_model.dart';
 import 'package:otvinta/screens/create_request_screen.dart';
-import 'package:intl/intl.dart';
+import 'package:otvinta/services/api_service.dart';
 import 'services_screen.dart';
 import 'requests_screen.dart';
 import 'benefits_screen.dart';
@@ -12,13 +10,13 @@ import 'profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
-
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  // --- Состояние виджета ---
+  final ApiService _apiService = ApiService();
+
   int _selectedIndex = 0;
   List<RequestModel> _requests = [];
   bool _isLoading = true;
@@ -30,80 +28,81 @@ class _HomeScreenState extends State<HomeScreen> {
     'Мой профиль'
   ];
 
-  // --- Жизненный цикл ---
   @override
   void initState() {
     super.initState();
     _loadRequests();
   }
 
-  // --- Методы для работы с данными ---
-
-  /// Загружает список заявок из локального хранилища.
   Future<void> _loadRequests() async {
-    final prefs = await SharedPreferences.getInstance();
-    final String? requestsString = prefs.getString('requests_data');
-    List<RequestModel> loadedRequests = [];
-
-    if (requestsString != null) {
-      final List<dynamic> requestsJson = jsonDecode(requestsString);
-      loadedRequests = requestsJson.map((json) => RequestModel.fromJson(json)).toList();
+    try {
+      final loadedRequests = await _apiService.fetchRequests();
+      if (mounted) {
+        setState(() {
+          _requests = loadedRequests;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Ошибка загрузки заявок: $e'), backgroundColor: Colors.red),
+        );
+      }
     }
-
-    // Обновляем состояние один раз после всех операций
-    setState(() {
-      _requests = loadedRequests;
-      _isLoading = false;
-    });
   }
 
-  /// Сохраняет текущий список заявок в локальное хранилище.
-  Future<void> _saveRequests() async {
-    final prefs = await SharedPreferences.getInstance();
-    final String requestsString = jsonEncode(_requests.map((r) => r.toJson()).toList());
-    await prefs.setString('requests_data', requestsString);
+  Future<void> _addRequest(ServiceModel service) async {
+    try {
+      final newRequestFromServer = await _apiService.createRequest(service.id);
+      setState(() {
+        _requests.insert(0, newRequestFromServer);
+      });
+      if (mounted) {
+         ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Заявка "${service.title}" успешно создана!'),
+            backgroundColor: Colors.green[700],
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Ошибка создания заявки: $e'), backgroundColor: Colors.red),
+        );
+      }
+    }
   }
 
-  /// Добавляет новую заявку в начало списка.
-  void _addRequest(ServiceModel service) {
-    // Создаем форматтер для даты в виде "день.месяц.год"
-    final DateFormat formatter = DateFormat('dd.MM.yyyy');
-    // Получаем текущую дату и форматируем ее в нужную строку
-    final String formattedDate = formatter.format(DateTime.now());
-
-    setState(() {
-      _requests.insert(
-        0,
-        RequestModel(
-          title: service.title,
-          date: formattedDate, // <-- ИСПОЛЬЗУЕМ РЕАЛЬНУЮ ДАТУ
-          status: RequestStatus.pending,
-        ),
-      );
-    });
-    _saveRequests();
-  }
-
-  /// Удаляет заявку из списка по ее ID.
-  void _deleteRequest(String id) {
+  Future<void> _deleteRequest(String id) async {
     final requestToRemove = _requests.firstWhere((req) => req.id == id);
+    final index = _requests.indexOf(requestToRemove);
 
     setState(() {
-      _requests.remove(requestToRemove);
+      _requests.removeAt(index);
     });
-    _saveRequests();
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Заявка "${requestToRemove.title}" удалена.'),
-        backgroundColor: Colors.red[700],
-      ),
-    );
+    try {
+      await _apiService.deleteRequest(id);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Заявка "${requestToRemove.title}" удалена.')),
+        );
+      }
+    } catch (e) {
+      setState(() {
+        _requests.insert(index, requestToRemove);
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Ошибка удаления: $e'), backgroundColor: Colors.red),
+        );
+      }
+    }
   }
 
-  // --- Методы для навигации и UI ---
-
-  /// Обрабатывает нажатие на сервис и открывает экран подтверждения.
   void _onServiceTap(ServiceModel service) async {
     final result = await Navigator.of(context).push<bool>(
       MaterialPageRoute(
@@ -111,37 +110,28 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
 
-    if (result == true) {
-      _addRequest(service);
-      _onItemTapped(1); // Переключаемся на экран "Мои заявки"
-
-      // Даем пользователю понятную обратную связь
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Заявка "${service.title}" успешно создана!'),
-          backgroundColor: Colors.green[700],
-        ),
-      );
+    if (mounted && result == true) {
+      await _addRequest(service);
+      _onItemTapped(1); 
     }
   }
 
-  /// Обрабатывает нажатие на элемент в нижней панели навигации.
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
   }
 
+  // --- ВОССТАНОВЛЕННЫЙ МЕТОД BUILD ---
   @override
   Widget build(BuildContext context) {
-    // Определяем, какой экран показывать в зависимости от выбранного индекса
     final List<Widget> widgetOptions = <Widget>[
       ServicesScreen(onServiceTap: _onServiceTap),
       _isLoading
           ? const Center(child: CircularProgressIndicator())
           : RequestsScreen(
               requests: _requests,
-              onDeleteRequest: _deleteRequest, // <-- ИСПРАВЛЕНО
+              onDeleteRequest: _deleteRequest,
             ),
       const BenefitsScreen(),
       const ProfileScreen(),
