@@ -24,6 +24,9 @@ class RequestListCreateView(generics.ListCreateAPIView):
     queryset = Request.objects.all()
     permission_classes = [permissions.IsAuthenticated]
 
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
 
 class RequestDetailView(generics.RetrieveAPIView):
     serializer_class = RequestSerializer
