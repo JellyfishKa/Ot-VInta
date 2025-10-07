@@ -76,7 +76,9 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  Future<void> _deleteRequest(String id) async {
+  // Измененный приватный метод для фактического удаления
+  Future<void> _performDeleteRequest(String id) async {
+    // Оптимистичное удаление из UI
     final requestToRemove = _requests.firstWhere((req) => req.id == id);
     final index = _requests.indexOf(requestToRemove);
 
@@ -85,6 +87,7 @@ class _HomeScreenState extends State<HomeScreen> {
     });
 
     try {
+      // Вызов API
       await _apiService.deleteRequest(id);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -92,6 +95,7 @@ class _HomeScreenState extends State<HomeScreen> {
         );
       }
     } catch (e) {
+      // В случае ошибки возвращаем заявку в список
       setState(() {
         _requests.insert(index, requestToRemove);
       });
@@ -100,6 +104,35 @@ class _HomeScreenState extends State<HomeScreen> {
           SnackBar(content: Text('Ошибка удаления: $e'), backgroundColor: Colors.red),
         );
       }
+    }
+  }
+
+  // Новый метод, который будет передан в RequestsScreen
+  // Он показывает диалог и вызывает _performDeleteRequest при подтверждении
+  Future<void> _confirmAndDeleteRequest(String id) async {
+    final bool? isConfirmed = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Подтверждение'),
+          content: const Text('Вы уверены, что хотите удалить заявку?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Нет'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('Да'),
+            ),
+          ],
+        );
+      },
+    );
+
+    // Если пользователь подтвердил действие (isConfirmed == true), то удаляем
+    if (isConfirmed ?? false) {
+      await _performDeleteRequest(id);
     }
   }
 
@@ -122,16 +155,17 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  // --- ВОССТАНОВЛЕННЫЙ МЕТОД BUILD ---
   @override
   Widget build(BuildContext context) {
+    
+    // Передаем новый метод _confirmAndDeleteRequest в RequestsScreen
     final List<Widget> widgetOptions = <Widget>[
       ServicesScreen(onServiceTap: _onServiceTap),
       _isLoading
           ? const Center(child: CircularProgressIndicator())
           : RequestsScreen(
               requests: _requests,
-              onDeleteRequest: _deleteRequest,
+              onDeleteRequest: _confirmAndDeleteRequest,
             ),
       const BenefitsScreen(),
       const ProfileScreen(),
