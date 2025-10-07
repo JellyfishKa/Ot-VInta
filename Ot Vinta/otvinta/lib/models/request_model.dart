@@ -1,3 +1,5 @@
+// lib/models/request_model.dart - ФИНАЛЬНАЯ ВЕРСИЯ 2.0
+
 enum RequestStatus {
   approved('Одобрено'),
   inProgress('В работе'),
@@ -7,46 +9,59 @@ enum RequestStatus {
   const RequestStatus(this.displayName);
   final String displayName;
   
-  // Вспомогательный метод для получения статуса из строки от бэкенда
-  static RequestStatus fromString(String statusString) {
+  static RequestStatus fromString(String? statusString) {
+    if (statusString == null) return RequestStatus.pending;
     return RequestStatus.values.firstWhere(
       (e) => e.name.toLowerCase() == statusString.toLowerCase(),
-      orElse: () => RequestStatus.pending, // Значение по умолчанию, если статус не найден
+      orElse: () => RequestStatus.pending,
     );
   }
 }
 
 class RequestModel {
-  final String id; // ID теперь обязателен и приходит с сервера
+  final int id;
   final String title;
   final String date; 
   final RequestStatus status;
 
+  // --- ДОБАВЛЕНО ПОЛЕ ДЛЯ ID СЕРВИСА ---
+  final int serviceId;
+  // ------------------------------------
+
   RequestModel({
-    required this.id, // <-- Изменено
+    required this.id,
     required this.title,
     required this.date,
     required this.status,
-  }); // Генерацию ID убрали
+    required this.serviceId, // Добавлено в конструктор
+  });
 
-  // toJson нужен, только если мы отправляем ПОЛНУЮ модель на сервер. 
-  // Обычно для создания мы отправляем другой набор полей (например, только service_id).
   Map<String, dynamic> toJson() {
     return {
       'id': id,
       'title': title,
-      'date': date, // Убедитесь, что отправляете в формате, который ждет сервер
+      'date': date,
       'status': status.name,
+      'service': serviceId, // Используем serviceId
     };
   }
 
   factory RequestModel.fromJson(Map<String, dynamic> json) {
-
     return RequestModel(
-      id: json['id'].toString(), // Преобразуем в строку на всякий случай
-      title: json['title'],
-      date: json['date'], // Или используйте formattedDate, если парсите дату
+      id: json['id'],
+      
+      // --- ИСПРАВЛЕНИЕ: Просто берем title, который пришел ---
+      // Сервер сам формирует название заявки, нам не нужно его конструировать.
+      title: json['title'] ?? 'Заявка без названия',
+      // --------------------------------------------------------
+
+      // Используем поле 'created_at' от сервера для даты
+      date: json['created_at'] ?? DateTime.now().toIso8601String(),
       status: RequestStatus.fromString(json['status']),
+      
+      // --- ИСПРАВЛЕНИЕ: Правильно читаем ID сервиса ---
+      serviceId: json['service'] ?? 0, // 0 как значение по умолчанию, если ID не пришел
+      // ------------------------------------------------
     );
   }
 }

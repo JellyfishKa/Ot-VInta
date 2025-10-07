@@ -1,5 +1,5 @@
 class ServiceModel {
-  final String id;
+  final int id;
   final String title;
   final String? description;
   final String? category; // Может быть ID или название категории
@@ -15,10 +15,10 @@ class ServiceModel {
 
   factory ServiceModel.fromJson(Map<String, dynamic> json) {
     return ServiceModel(
-      id: json['id'].toString(), // Безопасное приведение к строке
+      id: json['id'], 
       title: json['title'] ?? 'Без названия',
       description: json['description'],
-      category: json['category'],
+      category: json['category']?.toString(),
       isActive: json['is_active'] ?? false,
     );
   }

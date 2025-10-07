@@ -55,7 +55,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _addRequest(ServiceModel service) async {
     try {
-      final newRequestFromServer = await _apiService.createRequest(service.id);
+      // --- ВОТ ИСПРАВЛЕНИЕ! ---
+      // Превращаем числовой ID сервиса в строку перед отправкой в API.
+      final newRequestFromServer = await _apiService.createRequest(service.id.toString());
+      // ------------------------
+      
       setState(() {
         _requests.insert(0, newRequestFromServer);
       });

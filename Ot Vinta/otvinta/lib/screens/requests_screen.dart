@@ -29,7 +29,7 @@ class RequestsScreen extends StatelessWidget {
        
         return Dismissible(
           // 'key' обязателен. Он помогает Flutter понять, какой именно элемент удаляется из списка.
-          key: Key(request.id),
+          key: Key(request.id.toString()),
 
           // Направление свайпа: от начала к концу (слева направо).
           direction: DismissDirection.startToEnd,
@@ -37,7 +37,7 @@ class RequestsScreen extends StatelessWidget {
           // Функция, которая вызывается, когда элемент полностью "смахнули".
           onDismissed: (direction) {
             // Вызываем функцию обратного вызова из HomeScreen, передавая ID заявки.
-            onDeleteRequest(request.id);
+            onDeleteRequest(request.id.toString());
           },
 
           // 'background' — это виджет, который появляется ПОД элементом во время свайпа.

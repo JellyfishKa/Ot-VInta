@@ -34,7 +34,7 @@ class RequestDetailsScreen extends StatelessWidget {
                 const SizedBox(height: 16),
 
                 // Используем вспомогательный виджет для отображения полей
-                _buildDetailRow('ID Заявки:', request.id),
+                _buildDetailRow('ID Заявки:', request.id.toString()),
                 const SizedBox(height: 12),
                 _buildDetailRow('Дата подачи:', request.date),
                 const SizedBox(height: 12),

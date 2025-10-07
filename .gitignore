@@ -13,6 +13,7 @@
 *.bak
 *.swp
 *.swo
+.env
 
 # macOS
 .DS_Store
