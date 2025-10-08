@@ -23,4 +23,5 @@ class AppDimens {
   // Другие размеры (например, высота кнопок, иконок)
   static const double iconSizeMedium = 24.0;
   static const double iconSizeLarge = 30.0;
+  static const double radius_20 = 20.0;
 }

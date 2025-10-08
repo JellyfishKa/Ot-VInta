@@ -1,8 +1,5 @@
-// lib/widgets/service_list_item.dart - ГОТОВИМ ПОД ДИЗАЙН
-
 import 'package:flutter/material.dart';
 import '../models/service_model.dart';
-// --- ИЗМЕНЕНИЕ: Импортируем наши dimens и стили ---
 import '../theme/app_dimens.dart';
 import '../theme/app_colors.dart'; // Нужен для Icon
 import '../theme/app_text_styles.dart'; // Чтобы использовать стили текста

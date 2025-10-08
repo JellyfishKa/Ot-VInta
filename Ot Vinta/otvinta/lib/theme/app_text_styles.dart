@@ -60,4 +60,10 @@ class AppTextStyles {
     fontWeight: FontWeight.bold,
     color: AppColors.textPrimary,
   );
+  // Caption: Для второстепенных подписей (ID заявки, дата)
+  static TextStyle get caption => GoogleFonts.inter(
+    fontSize: 14,
+    fontWeight: FontWeight.normal, // Regular
+    color: AppColors.textSecondary,
+  );
 }

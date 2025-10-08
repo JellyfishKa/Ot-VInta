@@ -1,5 +1,3 @@
-// lib/models/request_model.dart - ФИНАЛЬНАЯ ВЕРСИЯ 2.0
-
 enum RequestStatus {
   approved('Одобрено'),
   inProgress('В работе'),

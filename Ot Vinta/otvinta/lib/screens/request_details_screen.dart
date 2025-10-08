@@ -1,5 +1,11 @@
+// lib/screens/request_details_screen.dart
+
 import 'package:flutter/material.dart';
 import 'package:otvinta/models/request_model.dart';
+import 'package:otvinta/theme/app_colors.dart';
+import 'package:otvinta/theme/app_dimens.dart';
+import 'package:otvinta/theme/app_text_styles.dart';
+import 'package:otvinta/widgets/status_stepper.dart';
 
 class RequestDetailsScreen extends StatelessWidget {
   final RequestModel request;
@@ -9,38 +15,67 @@ class RequestDetailsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // Используем цвет фона из дизайн-системы
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Детали заявки'),
+        // Прозрачный AppBar, чтобы был виден цвет фона Scaffold
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        // Стандартная кнопка "назад" будет стилизована глобальной темой
+        // Убираем автоматическую тень от иконки
+        iconTheme: Theme.of(context).iconTheme.copyWith(color: AppColors.textPrimary),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Здесь можно вставить ваше лого из ассетов, например:
+            // Image.asset('assets/logo.png', height: 24),
+            // Пока используем иконку-плейсхолдер
+            const Icon(Icons.shield_outlined, color: AppColors.primary, size: AppDimens.iconSizeLarge),
+            const SizedBox(width: AppDimens.padding_8),
+            Text('Head Ladder', style: AppTextStyles.logo),
+          ],
+        ),
+        centerTitle: true,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
+      body: SingleChildScrollView(
+        // Используем отступы из дизайн-системы
+        padding: const EdgeInsets.all(AppDimens.padding_16),
         child: Card(
-          // Оборачиваем детали в Card для лучшего визуального отделения
-          elevation: 2,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          elevation: 4,
+          shadowColor: Colors.black.withOpacity(0.1),
+          color: AppColors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppDimens.radius_12),
+          ),
           child: Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(AppDimens.padding_24),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              // mainAxisSize.min позволяет Column занять минимально необходимое место
-              mainAxisSize: MainAxisSize.min, 
               children: [
-                Text(
-                  request.title,
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 24),
-                const Divider(), // Визуальный разделитель
-                const SizedBox(height: 16),
+                // ЗАГОЛОВОК "Детали заявки"
+                Text('Детали заявки:', style: AppTextStyles.h2),
+                const SizedBox(height: AppDimens.padding_24),
 
-                // Используем вспомогательный виджет для отображения полей
-                _buildDetailRow('ID Заявки:', request.id.toString()),
-                const SizedBox(height: 12),
-                _buildDetailRow('Дата подачи:', request.date),
-                const SizedBox(height: 12),
-                
-                // Отображение статуса с цветовой индикацией
-                _buildStatusRow('Статус:', request.status),
+                // СТРОКА С ID И ДАТОЙ
+                Row(
+                  children: [
+                    _buildInfoColumn('ID заявки:', "M-${request.id}"),
+                    const SizedBox(width: AppDimens.padding_32),
+                    _buildInfoColumn('Дата:', request.date), // TODO: отформатируйте дату, если нужно
+                  ],
+                ),
+                const SizedBox(height: AppDimens.padding_24),
+
+                // СЕКЦИЯ "Описание"
+                _buildInfoColumn('Описание:', request.title),
+                const SizedBox(height: AppDimens.padding_32),
+
+                // ЗАГОЛОВОК "Путь заявки"
+                Text('Путь заявки:', style: AppTextStyles.h2),
+                const SizedBox(height: AppDimens.padding_16),
+
+                // ИНТЕГРАЦИЯ ВИДЖЕТА СТАТУСОВ
+                StatusStepper(currentStatus: request.status),
               ],
             ),
           ),
@@ -49,56 +84,15 @@ class RequestDetailsScreen extends StatelessWidget {
     );
   }
 
-  /// Вспомогательный виджет для отображения строки "Метка: Значение"
-  Widget _buildDetailRow(String label, String value) {
-    return Row(
+  /// Вспомогательный виджет для отрисовки колонки "Заголовок-Значение".
+  Widget _buildInfoColumn(String title, String value) {
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey[700]),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Text(value, style: const TextStyle(fontSize: 16)),
-        ),
+        Text(title, style: AppTextStyles.caption),
+        const SizedBox(height: AppDimens.padding_4),
+        Text(value, style: AppTextStyles.h3),
       ],
     );
-  }
-
-  /// Виджет для отображения статуса в виде стилизованного "чипа"
-  Widget _buildStatusRow(String label, RequestStatus status) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Text(
-          label,
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey[700]),
-        ),
-        const SizedBox(width: 8),
-        Chip(
-          label: Text(
-            status.displayName,
-            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-          ),
-          backgroundColor: _getStatusColor(status),
-          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-        ),
-      ],
-    );
-  }
-
-  /// Возвращает цвет в зависимости от статуса заявки
-  Color _getStatusColor(RequestStatus status) {
-    switch (status) {
-      case RequestStatus.approved:
-        return Colors.green;
-      case RequestStatus.inProgress:
-        return Colors.orange;
-      case RequestStatus.rejected:
-        return Colors.red;
-      case RequestStatus.pending:
-        return Colors.blue;
-    }
   }
 }
