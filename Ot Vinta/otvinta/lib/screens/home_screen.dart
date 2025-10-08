@@ -3,6 +3,7 @@ import 'package:otvinta/models/request_model.dart';
 import 'package:otvinta/models/service_model.dart';
 import 'package:otvinta/screens/create_request_screen.dart';
 import 'package:otvinta/services/api_service.dart';
+import '../theme/app_colors.dart';
 import 'services_screen.dart';
 import 'requests_screen.dart';
 import 'benefits_screen.dart';
@@ -46,8 +47,9 @@ class _HomeScreenState extends State<HomeScreen> {
     } catch (e) {
       if (mounted) {
         setState(() => _isLoading = false);
+        // Используем цвета из темы для SnackBar
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Ошибка загрузки заявок: $e'), backgroundColor: Colors.red),
+          SnackBar(content: Text('Ошибка загрузки заявок: $e'), backgroundColor: Theme.of(context).colorScheme.error),
         );
       }
     }
@@ -55,11 +57,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _addRequest(ServiceModel service) async {
     try {
-      // --- ВОТ ИСПРАВЛЕНИЕ! ---
-      // Превращаем числовой ID сервиса в строку перед отправкой в API.
       final newRequestFromServer = await _apiService.createRequest(service.id.toString());
-      // ------------------------
-      
       setState(() {
         _requests.insert(0, newRequestFromServer);
       });
@@ -67,23 +65,22 @@ class _HomeScreenState extends State<HomeScreen> {
          ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Заявка "${service.title}" успешно создана!'),
-            backgroundColor: Colors.green[700],
+            backgroundColor: AppColors.success, // Используем наш цвет успеха
           ),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Ошибка создания заявки: $e'), backgroundColor: Colors.red),
+          SnackBar(content: Text('Ошибка создания заявки: $e'), backgroundColor: Theme.of(context).colorScheme.error),
         );
       }
     }
   }
 
-  // Измененный приватный метод для фактического удаления
   Future<void> _performDeleteRequest(String id) async {
-    // Оптимистичное удаление из UI
-    final requestToRemove = _requests.firstWhere((req) => req.id == id);
+    // --- ИСПРАВЛЕНИЕ: Сравниваем id, приводя число к строке ---
+    final requestToRemove = _requests.firstWhere((req) => req.id.toString() == id);
     final index = _requests.indexOf(requestToRemove);
 
     setState(() {
@@ -91,7 +88,6 @@ class _HomeScreenState extends State<HomeScreen> {
     });
 
     try {
-      // Вызов API
       await _apiService.deleteRequest(id);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -99,20 +95,17 @@ class _HomeScreenState extends State<HomeScreen> {
         );
       }
     } catch (e) {
-      // В случае ошибки возвращаем заявку в список
       setState(() {
         _requests.insert(index, requestToRemove);
       });
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Ошибка удаления: $e'), backgroundColor: Colors.red),
+          SnackBar(content: Text('Ошибка удаления: $e'), backgroundColor: Theme.of(context).colorScheme.error),
         );
       }
     }
   }
 
-  // Новый метод, который будет передан в RequestsScreen
-  // Он показывает диалог и вызывает _performDeleteRequest при подтверждении
   Future<void> _confirmAndDeleteRequest(String id) async {
     final bool? isConfirmed = await showDialog<bool>(
       context: context,
@@ -134,7 +127,6 @@ class _HomeScreenState extends State<HomeScreen> {
       },
     );
 
-    // Если пользователь подтвердил действие (isConfirmed == true), то удаляем
     if (isConfirmed ?? false) {
       await _performDeleteRequest(id);
     }
@@ -161,15 +153,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     
-    // Передаем новый метод _confirmAndDeleteRequest в RequestsScreen
     final List<Widget> widgetOptions = <Widget>[
       ServicesScreen(onServiceTap: _onServiceTap),
       _isLoading
           ? const Center(child: CircularProgressIndicator())
           : RequestsScreen(
               requests: _requests,
-              onDeleteRequest: _confirmAndDeleteRequest,
+              onDeleteRequest: (requestId) => _confirmAndDeleteRequest(requestId.toString()), // Передаем ID как строку
             ),
       const BenefitsScreen(),
       const ProfileScreen(),
@@ -190,8 +182,9 @@ class _HomeScreenState extends State<HomeScreen> {
           BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: 'Профиль'),
         ],
         currentIndex: _selectedIndex,
-        selectedItemColor: Theme.of(context).primaryColor,
-        unselectedItemColor: Colors.grey,
+        // Используем цвета из темы и нашей палитры
+        selectedItemColor: theme.colorScheme.primary,
+        unselectedItemColor: AppColors.textSecondary,
         showUnselectedLabels: true,
         type: BottomNavigationBarType.fixed,
         onTap: _onItemTapped,
