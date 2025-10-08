@@ -11,6 +11,8 @@ dependencies:
   flutter:
     sdk: flutter
 
+  google_fonts: ^6.2.1 
+  flutter_svg: ^2.0.10+1
   # --- Пакеты для работы приложения ---
 
   # Для загрузки конфигурации из .env файла (URL, токены)
