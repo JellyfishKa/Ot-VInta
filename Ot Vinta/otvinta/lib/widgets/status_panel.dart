@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:otvinta/models/request_model.dart';
+import 'package:head_ladder/models/request_model.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_dimens.dart';
 

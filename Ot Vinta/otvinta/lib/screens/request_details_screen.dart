@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart'; 
-import 'package:otvinta/models/request_model.dart';
-import 'package:otvinta/theme/app_colors.dart';
-import 'package:otvinta/theme/app_dimens.dart';
-import 'package:otvinta/theme/app_text_styles.dart';
-import 'package:otvinta/widgets/status_stepper.dart';
+import 'package:head_ladder/models/request_model.dart';
+import 'package:head_ladder/theme/app_colors.dart';
+import 'package:head_ladder/theme/app_dimens.dart';
+import 'package:head_ladder/theme/app_text_styles.dart';
+import 'package:head_ladder/widgets/status_stepper.dart';
 
 class RequestDetailsScreen extends StatelessWidget {
   final RequestModel request;

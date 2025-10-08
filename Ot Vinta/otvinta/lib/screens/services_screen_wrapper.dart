@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:otvinta/models/service_model.dart';
-import 'package:otvinta/screens/create_request_screen.dart';
-import 'package:otvinta/screens/services_screen.dart';
-import 'package:otvinta/theme/app_dimens.dart';
+import 'package:head_ladder/models/service_model.dart';
+import 'package:head_ladder/screens/create_request_screen.dart';
+import 'package:head_ladder/screens/services_screen.dart';
+import 'package:head_ladder/theme/app_colors.dart';
+import 'package:head_ladder/widgets/headladder_app_bar.dart';
+
 
 class ServicesScreenWrapper extends StatelessWidget {
   const ServicesScreenWrapper({super.key});
@@ -17,16 +18,15 @@ class ServicesScreenWrapper extends StatelessWidget {
           ),
         );
         if(result == true && context.mounted) {
-            Navigator.of(context).pop(); // Go back from wrapper to refresh previous screen
+            Navigator.of(context).pop();
         }
     }
 
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: SvgPicture.asset('assets/icons/logo.svg', height: AppDimens.iconSizeLarge),
-        centerTitle: true,
+      backgroundColor: AppColors.background,
+      // --- ИЗМЕНЕНО: Стандартный AppBar заменен на наш кастомный ---
+      appBar: const HeadLadderAppBar(
+        title: 'Доступные сервисы',
       ),
       body: ServicesScreen(onServiceTap: onServiceTap),
     );

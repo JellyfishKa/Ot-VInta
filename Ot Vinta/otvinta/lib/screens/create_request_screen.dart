@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:otvinta/models/service_model.dart';
-import 'package:otvinta/services/api_service.dart';
+import 'package:head_ladder/models/service_model.dart';
+import 'package:head_ladder/services/api_service.dart';
 import '../theme/app_dimens.dart';
 import '../theme/app_text_styles.dart';
 import '../theme/app_colors.dart';

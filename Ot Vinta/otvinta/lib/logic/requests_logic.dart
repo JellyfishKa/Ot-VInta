@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:otvinta/models/request_model.dart';
-import 'package:otvinta/models/service_model.dart'; 
-import 'package:otvinta/services/api_service.dart';
-import 'package:otvinta/theme/app_colors.dart';
+import 'package:head_ladder/models/request_model.dart';
+import 'package:head_ladder/models/service_model.dart'; 
+import 'package:head_ladder/services/api_service.dart';
+import 'package:head_ladder/theme/app_colors.dart';
 
 class RequestsLogic {
   final ApiService _apiService = ApiService();

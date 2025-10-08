@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:otvinta/models/request_model.dart';
-import 'package:otvinta/widgets/status_panel.dart';
+import 'package:head_ladder/models/request_model.dart';
+import 'package:head_ladder/widgets/status_panel.dart';
 import '../theme/app_dimens.dart';
 import '../theme/app_text_styles.dart';
 

@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:otvinta/models/user_model.dart';
-import 'package:otvinta/screens/benefits_screen_wrapper.dart';
-import 'package:otvinta/screens/profile_screen.dart';
-import 'package:otvinta/screens/requests_screen_wrapper.dart';
-import 'package:otvinta/screens/services_screen_wrapper.dart';
-import 'package:otvinta/theme/app_colors.dart';
-import 'package:otvinta/theme/app_dimens.dart';
-import 'package:otvinta/theme/app_text_styles.dart';
+import 'package:head_ladder/models/user_model.dart';
+import 'package:head_ladder/screens/benefits_screen_wrapper.dart';
+import 'package:head_ladder/screens/profile_screen.dart';
+import 'package:head_ladder/screens/requests_screen_wrapper.dart';
+import 'package:head_ladder/screens/services_screen_wrapper.dart';
+import 'package:head_ladder/theme/app_colors.dart';
+import 'package:head_ladder/theme/app_dimens.dart';
+import 'package:head_ladder/theme/app_text_styles.dart';
+import 'package:head_ladder/widgets/headladder_app_bar.dart';
 
-// Теперь это простой StatelessWidget
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
@@ -20,20 +19,20 @@ class HomeScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: SvgPicture.asset('assets/icons/logo.svg', height: AppDimens.iconSizeLarge),
-        centerTitle: true,
+      // --- ИЗМЕНЕНО: Используем наш стандартный AppBar без кнопки "назад" ---
+      appBar: const HeadLadderAppBar(
+        showBackButton: false,
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: AppDimens.padding_16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            const SizedBox(height: AppDimens.padding_16),
             _buildGreeting(user),
             const SizedBox(height: AppDimens.padding_32),
             _buildNavigationButton(
+              context,
               'Личный кабинет',
               isPrimary: false,
               onPressed: () {
@@ -42,6 +41,7 @@ class HomeScreen extends StatelessWidget {
             ),
             const SizedBox(height: AppDimens.padding_16),
             _buildNavigationButton(
+              context,
               'Мои заявки',
               onPressed: () {
                 Navigator.push(context, MaterialPageRoute(builder: (_) => const RequestsScreenWrapper()));
@@ -49,6 +49,7 @@ class HomeScreen extends StatelessWidget {
             ),
             const SizedBox(height: AppDimens.padding_16),
             _buildNavigationButton(
+              context,
               'Льготы и программы',
               onPressed: () {
                 Navigator.push(context, MaterialPageRoute(builder: (_) => const BenefitsScreenWrapper()));
@@ -56,6 +57,7 @@ class HomeScreen extends StatelessWidget {
             ),
             const SizedBox(height: AppDimens.padding_16),
             _buildNavigationButton(
+              context,
               'Доступные сервисы',
               onPressed: () {
                 Navigator.push(context, MaterialPageRoute(builder: (_) => const ServicesScreenWrapper()));
@@ -69,38 +71,43 @@ class HomeScreen extends StatelessWidget {
 
   Widget _buildGreeting(UserModel user) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Здравствуйте,', style: AppTextStyles.h1.copyWith(fontWeight: FontWeight.w500)),
+              Text('Здравствуйте,', style: AppTextStyles.h1.copyWith(fontWeight: FontWeight.normal)),
               Text('${user.firstName}!', style: AppTextStyles.h1),
             ],
           ),
         ),
+        const SizedBox(width: AppDimens.padding_16),
         CircleAvatar(
-          radius: 30,
-          backgroundImage: (user.avatarUrl != null && user.avatarUrl!.isNotEmpty) 
-              ? NetworkImage(user.avatarUrl!) 
-              : null,
+          radius: 36, // Немного увеличим радиус для соответствия макету
           backgroundColor: AppColors.divider,
-          child: (user.avatarUrl == null || user.avatarUrl!.isEmpty) 
-              ? const Icon(Icons.person, color: AppColors.textSecondary) 
+
+          backgroundImage: (user.avatarUrl != null && user.avatarUrl!.isNotEmpty)
+              ? NetworkImage(user.avatarUrl!)
               : null,
+          child: const Icon(Icons.person, color: AppColors.textSecondary, size: 36),
         ),
       ],
     );
   }
 
-  Widget _buildNavigationButton(String text, {required VoidCallback onPressed, bool isPrimary = true}) {
+  Widget _buildNavigationButton(BuildContext context, String text, {required VoidCallback onPressed, bool isPrimary = true}) {
+    final shape = RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(AppDimens.radius_12),
+    );
+    const padding = EdgeInsets.symmetric(vertical: AppDimens.padding_20);
+
     if (isPrimary) {
       return ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
-          padding: const EdgeInsets.symmetric(vertical: AppDimens.padding_16),
+          shape: shape,
+          padding: padding,
         ),
         child: Text(text),
       );
@@ -108,7 +115,9 @@ class HomeScreen extends StatelessWidget {
       return OutlinedButton(
         onPressed: onPressed,
          style: OutlinedButton.styleFrom(
-          padding: const EdgeInsets.symmetric(vertical: AppDimens.padding_16),
+          shape: shape,
+          padding: padding,
+          side: const BorderSide(color: AppColors.primary, width: 1.5),
         ),
         child: Text(text),
       );

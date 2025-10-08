@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:otvinta/logic/requests_logic.dart';
-import 'package:otvinta/screens/requests_screen.dart';
-import 'package:otvinta/theme/app_colors.dart';
-import 'package:otvinta/theme/app_dimens.dart';
-import 'package:otvinta/theme/app_text_styles.dart';
+import 'package:head_ladder/logic/requests_logic.dart';
+import 'package:head_ladder/screens/requests_screen.dart';
+import 'package:head_ladder/theme/app_colors.dart';
+import 'package:head_ladder/theme/app_dimens.dart';
+import 'package:head_ladder/theme/app_text_styles.dart';
+import 'package:head_ladder/widgets/headladder_app_bar.dart';
 
 class RequestsScreenWrapper extends StatefulWidget {
   const RequestsScreenWrapper({super.key});
@@ -18,7 +19,6 @@ class _RequestsScreenWrapperState extends State<RequestsScreenWrapper> {
   @override
   void initState() {
     super.initState();
-    // --- ИЗМЕНЕНО: Вызываем новый метод для загрузки всех данных ---
     _logic.loadData(
       (error) {
         if (mounted) {
@@ -38,37 +38,24 @@ class _RequestsScreenWrapperState extends State<RequestsScreenWrapper> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      // --- ИЗМЕНЕНО: AppBar приведен в соответствие с дизайном ---
-      appBar: AppBar(
-        backgroundColor: AppColors.background,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        title: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // TODO: Замените на ваше лого из ассетов
-            const Icon(Icons.api, color: AppColors.primary, size: AppDimens.iconSizeLarge),
-            const SizedBox(width: AppDimens.padding_8),
-            Text('Head Ladder', style: AppTextStyles.logo),
-          ],
-        ),
-        // --- ДОБАВЛЕНО: Заголовок "Активные заявки" под AppBar ---
+      // --- ИЗМЕНЕНО: Вся логика AppBar теперь в одном месте ---
+      appBar: HeadLadderAppBar(
+        // title не указываем, чтобы отображался логотип
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(40.0),
-          child: Text(
-            'Активные заявки',
-            style: AppTextStyles.h2
+          // --- УЛУЧШЕНО: Добавили выравнивание и отступы для консистентности ---
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppDimens.padding_16),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text('Активные заявки', style: AppTextStyles.h1),
+            ),
           ),
         ),
-        centerTitle: true,
       ),
       body: _logic.isLoading
           ? const Center(child: CircularProgressIndicator())
           : RequestsScreen(
-              // --- ИЗМЕНЕНО: Передаем оба набора данных ---
               requests: _logic.requests,
               servicesMap: _logic.servicesMap,
               onDeleteRequest: (id) {

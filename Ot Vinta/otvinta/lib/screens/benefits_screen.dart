@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:otvinta/models/benefit_model.dart'; // Убедитесь, что путь к модели верный
-import 'package:otvinta/services/api_service.dart';
-import 'package:otvinta/theme/app_dimens.dart';
-import 'package:otvinta/widgets/benefit_category_item.dart';
+import 'package:head_ladder/models/benefit_model.dart'; // Убедитесь, что путь к модели верный
+import 'package:head_ladder/services/api_service.dart';
+import 'package:head_ladder/theme/app_dimens.dart';
+import 'package:head_ladder/widgets/benefit_category_item.dart';
 
 class BenefitsScreen extends StatefulWidget {
   const BenefitsScreen({super.key});
@@ -54,7 +54,7 @@ class _BenefitsScreenState extends State<BenefitsScreen> {
           return const Center(child: CircularProgressIndicator());
         }
         if (snapshot.hasError) {
-          return Center(child: Text('Произошла ошибка загрузки данных.'));
+          return const Center(child: Text('Произошла ошибка загрузки данных.'));
         }
         if (!snapshot.hasData || snapshot.data!.isEmpty) {
           return const Center(child: Text('Доступных льгот и программ нет.'));
