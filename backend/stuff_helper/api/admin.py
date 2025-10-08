@@ -5,12 +5,41 @@ from core.models import User, Services, Benefit, Request, Category
 
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
-    list_display = ('id', 'username', 'email', 
-                    'department', 'is_staff', 'is_active')
-    list_filter = ('is_staff', 'is_active')
-    search_fields = ('username', 'email')
+    list_display = (
+        'id', 'username', 'email', 'department',
+        'employee_id', 'is_staff', 'is_active')
+    list_filter = ('is_staff', 'is_active', 'department', 'employee_id')
+    search_fields = ('username', 'email', 'department', 'employee_id')
     ordering = ('id',)
+    fieldsets = (
+        ('Employee Info', {
+            'fields': ('employee_id', 'department'),
+        }),
+        ('Authentication', {
+            'fields': ('username', 'password'),
+        }),
+        ('Personal info', {
+            'fields': ('first_name', 'last_name', 'email'),
+        }),
+        ('Permissions', {
+            'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions'),
+        }),
+        ('Important dates', {
+            'fields': ('last_login', 'date_joined'),
+        }),
+    )
 
+    # Also adjust add form
+    add_fieldsets = (
+        (None, {
+            'classes': ('wide',),
+            'fields': (
+                'username', 'password1', 'password2',
+                'employee_id', 'department',
+                'is_staff', 'is_active'
+            ),
+        }),
+    )
 
 @admin.register(Services)
 class ServicesAdmin(admin.ModelAdmin):
