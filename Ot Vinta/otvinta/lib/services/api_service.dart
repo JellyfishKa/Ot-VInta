@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 import '../models/request_model.dart';
 import '../models/service_model.dart';
 import '../models/benefit_model.dart';
@@ -11,6 +12,8 @@ class ApiService {
   final String _servicesPath = dotenv.env['SERVICES_PATH']!;
   final String _benefitsPath = dotenv.env['BENEFITS_PATH']!;
   final String _requestsPath = dotenv.env['REQUESTS_PATH']!;
+  // Эндпоинт для профиля пользователя. Убедитесь, что он правильный.
+  final String _profilePath = '/api/users/me/'; 
 
   Map<String, String> _getHeaders() {
     return {
@@ -18,6 +21,9 @@ class ApiService {
       'Authorization': 'Token $_token',
     };
   }
+  
+  /// Загружает данные текущего пользователя.
+
 
   Future<List<ServiceModel>> fetchServices() async {
     final url = Uri.parse('$_baseUrl$_servicesPath');
@@ -73,26 +79,10 @@ class ApiService {
     }
   }
   
-  Future<RequestModel> fetchRequestById(String id) async {
-    final url = Uri.parse('$_baseUrl$_requestsPath$id/'); 
-    final response = await http.get(url, headers: _getHeaders());
-
-    if (response.statusCode == 200) {
-      final dynamic body = json.decode(utf8.decode(response.bodyBytes));
-      return RequestModel.fromJson(body);
-    } else {
-      throw Exception('Ошибка загрузки заявки с ID $id. Код: ${response.statusCode}');
-    }
-  }
-  
-  /// Удаляет заявку по ее ID.
   Future<void> deleteRequest(String id) async {
-    // Формируем правильный URL с /delete на конце
     final url = Uri.parse('$_baseUrl$_requestsPath$id/delete');
-    
     final response = await http.delete(url, headers: _getHeaders());
 
-    // 204 No Content - успешное удаление
     if (response.statusCode != 204) { 
       throw Exception('Не удалось удалить заявку. Код ответа: ${response.statusCode}, Тело: ${response.body}');
     }

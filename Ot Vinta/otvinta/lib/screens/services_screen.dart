@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:collection/collection.dart';
 import 'package:otvinta/models/service_model.dart';
 import 'package:otvinta/services/api_service.dart';
-import 'package:otvinta/theme/app_colors.dart';
 import 'package:otvinta/theme/app_dimens.dart';
 import 'package:otvinta/theme/app_text_styles.dart';
 import 'package:otvinta/widgets/service_category_item.dart';

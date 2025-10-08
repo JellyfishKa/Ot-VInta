@@ -1,92 +1,114 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:otvinta/models/user_model.dart';
+import 'package:otvinta/theme/app_colors.dart';
+import 'package:otvinta/theme/app_dimens.dart';
+import 'package:otvinta/theme/app_text_styles.dart';
 
+// Теперь это простой StatelessWidget
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: <Widget>[
-          // Аватар пользователя
-          const CircleAvatar(
-            radius: 50,
-            backgroundImage: NetworkImage('https://i.pravatar.cc/150?img=12'), // Используем сервис-заглушку для фото
-            backgroundColor: Colors.grey,
-          ),
-          const SizedBox(height: 16),
-          // ФИО
-          const Text(
-            'Смирнов Алексей Петрович',
-            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 4),
-          // Должность
-          const Text(
-            'Ведущий инженер-программист',
-            style: TextStyle(fontSize: 16, color: Colors.grey),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 24),
-          // Разделитель
-          const Divider(),
-          const SizedBox(height: 16),
-          // Карточка с информацией
-          Card(
-            elevation: 2.0,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
+    // Получаем наши фейковые данные
+    final user = UserModel.mock();
+
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
+        automaticallyImplyLeading: true,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        title: SvgPicture.asset('assets/icons/logo.svg', height: AppDimens.iconSizeLarge),
+        centerTitle: true,
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: AppDimens.padding_16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const SizedBox(height: AppDimens.padding_24),
+            CircleAvatar(
+              radius: 50,
+              backgroundImage: (user.avatarUrl != null) ? NetworkImage(user.avatarUrl!) : null,
+              child: (user.avatarUrl == null) ? const Icon(Icons.person, size: 50) : null,
             ),
-             // Убираем лишние отступы у ListTile внутри Card
-            margin: EdgeInsets.zero,
-            child: const Column(
-              children: [
-                ListTile(
-                  leading: Icon(Icons.badge_outlined),
-                  title: Text('Табельный номер'),
-                  subtitle: Text('778-120-945'),
-                ),
-                ListTile(
-                  leading: Icon(Icons.work_outline),
-                  title: Text('Департамент'),
-                  subtitle: Text('Отдел разработки мобильных приложений'),
-                ),
-                ListTile(
-                  leading: Icon(Icons.alternate_email_outlined),
-                  title: Text('Корпоративная почта'),
-                  subtitle: Text('a.smirnov@otvinta.corp'),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 32),
-          // Кнопка выхода
-          SizedBox(
-            width: double.infinity, // Кнопка на всю ширину
-            child: ElevatedButton.icon(
-              icon: const Icon(Icons.logout),
-              label: const Text('Выйти из аккаунта'),
-              onPressed: () {
-                // Здесь будет логика выхода из приложения
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Выполняется выход...')),
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                backgroundColor: Colors.red.shade400,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+            const SizedBox(height: AppDimens.padding_16),
+            Text(user.fullName, style: AppTextStyles.h2, textAlign: TextAlign.center),
+            const SizedBox(height: AppDimens.padding_4),
+            Text(user.position, style: AppTextStyles.body.copyWith(color: AppColors.textSecondary), textAlign: TextAlign.center),
+            const SizedBox(height: AppDimens.padding_24),
+            
+            Card(
+              elevation: 2,
+              shadowColor: Colors.black12,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppDimens.radius_12)),
+              child: Padding(
+                padding: const EdgeInsets.all(AppDimens.padding_16),
+                child: Column(
+                  children: [
+                    _buildInfoRow(
+                      iconSvg: 'tabel.svg',
+                      title: 'Табельный номер',
+                      value: user.employeeId ?? 'Не указан',
+                    ),
+                    const Divider(height: AppDimens.padding_24),
+                    _buildInfoRow(
+                      iconSvg: 'case.svg',
+                      title: 'Департамент',
+                      value: user.department ?? 'Не указан',
+                    ),
+                     const Divider(height: AppDimens.padding_24),
+                    _buildInfoRow(
+                      iconSvg: 'email.svg',
+                      title: 'Корпоративная почта',
+                      value: user.email,
+                    ),
+                  ],
                 ),
               ),
             ),
-          ),
-        ],
+            const SizedBox(height: AppDimens.padding_32),
+            
+            ElevatedButton(
+              onPressed: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Функция выхода в данный момент неактивна.')),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size(double.infinity, 50),
+              ),
+              child: const Text('Выйти из аккаунта'),
+            ),
+            const SizedBox(height: AppDimens.padding_24),
+          ],
+        ),
       ),
+    );
+  }
+
+  Widget _buildInfoRow({required String iconSvg, required String title, required String value}) {
+    return Row(
+      children: [
+        SvgPicture.asset(
+          'assets/icons/$iconSvg',
+          height: AppDimens.iconSizeMedium,
+          colorFilter: const ColorFilter.mode(AppColors.textSecondary, BlendMode.srcIn),
+        ),
+        const SizedBox(width: AppDimens.padding_16),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(title, style: AppTextStyles.caption),
+              const SizedBox(height: AppDimens.padding_4),
+              Text(value, style: AppTextStyles.body),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

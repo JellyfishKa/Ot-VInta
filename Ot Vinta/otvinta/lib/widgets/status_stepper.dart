@@ -63,8 +63,8 @@ class _StatusStep extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Определяем цвета на основе состояния
-    final Color activeColor = AppColors.statusInProgressText;
-    final Color inactiveColor = AppColors.divider;
+    const Color activeColor = AppColors.statusInProgressText;
+    const Color inactiveColor = AppColors.divider;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
