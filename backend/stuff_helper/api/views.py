@@ -24,6 +24,9 @@ class RequestListCreateView(generics.ListCreateAPIView):
     queryset = Request.objects.all()
     permission_classes = [permissions.IsAuthenticated]
 
+    def get_queryset(self):
+        return Request.objects.filter(user=self.request.user)
+
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
@@ -32,6 +35,9 @@ class RequestDetailView(generics.RetrieveAPIView):
     serializer_class = RequestSerializer
     queryset = Request.objects.all()
     permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return Request.objects.filter(user=self.request.user)
 
 
 class RequestDeleteView(generics.DestroyAPIView):
