@@ -6,11 +6,14 @@ import '../theme/app_text_styles.dart';
 
 class RequestListItem extends StatelessWidget {
   final RequestModel request;
+  // --- ДОБАВЛЕНО: Теперь виджет требует название сервиса ---
+  final String serviceName;
   final VoidCallback onTap;
 
   const RequestListItem({
     super.key,
     required this.request,
+    required this.serviceName, // Добавлено в конструктор
     required this.onTap,
   });
 
@@ -44,16 +47,18 @@ class RequestListItem extends StatelessWidget {
                   children: [
                     Text('ID заявки:', style: AppTextStyles.caption),
                     const SizedBox(height: AppDimens.padding_4),
-                    Text(request.id.toString(), style: AppTextStyles.h3),
+                    // --- ИЗМЕНЕНО: ID заявки теперь M-ID, как в макете ---
+                    Text("M-${request.id}", style: AppTextStyles.h3),
                   ],
                 ),
                 StatusPanel(status: request.status),
               ],
             ),
             const SizedBox(height: AppDimens.padding_12),
+            // --- ИЗМЕНЕНО: Отображаем название сервиса вместо title заявки ---
             Text(
-              '[${request.title}]',
-              style: AppTextStyles.caption.copyWith(fontSize: 16),
+              '[$serviceName]',
+              style: AppTextStyles.body, // Используем основной стиль для текста
             ),
           ],
         ),

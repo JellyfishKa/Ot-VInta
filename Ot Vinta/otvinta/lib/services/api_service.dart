@@ -12,8 +12,7 @@ class ApiService {
   final String _servicesPath = dotenv.env['SERVICES_PATH']!;
   final String _benefitsPath = dotenv.env['BENEFITS_PATH']!;
   final String _requestsPath = dotenv.env['REQUESTS_PATH']!;
-  // Эндпоинт для профиля пользователя. Убедитесь, что он правильный.
-  final String _profilePath = '/api/users/me/'; 
+  final String _profilePath = '/api/users/me/';
 
   Map<String, String> _getHeaders() {
     return {
@@ -21,9 +20,6 @@ class ApiService {
       'Authorization': 'Token $_token',
     };
   }
-  
-  /// Загружает данные текущего пользователя.
-
 
   Future<List<ServiceModel>> fetchServices() async {
     final url = Uri.parse('$_baseUrl$_servicesPath');
@@ -79,8 +75,10 @@ class ApiService {
     }
   }
   
-  Future<void> deleteRequest(String id) async {
-    final url = Uri.parse('$_baseUrl$_requestsPath$id/delete');
+  // --- ИЗМЕНЕНО: Исправление логики удаления ---
+  Future<void> deleteRequest(int id) async { // Принимаем int
+    // Убираем /delete, стандартный REST эндпоинт - DELETE /api/requests/{id}/
+    final url = Uri.parse('$_baseUrl$_requestsPath$id/'); 
     final response = await http.delete(url, headers: _getHeaders());
 
     if (response.statusCode != 204) { 

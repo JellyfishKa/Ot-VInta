@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:otvinta/models/benefit_model.dart';
+import 'package:otvinta/models/benefit_model.dart'; 
 import 'package:otvinta/theme/app_colors.dart';
 import 'package:otvinta/theme/app_dimens.dart';
 import 'package:otvinta/theme/app_text_styles.dart';
 
 class BenefitCategoryItem extends StatefulWidget {
   final BenefitModel benefit;
-  final String iconSvg;
+  final String iconSvgName; // Используем это имя параметра
 
   const BenefitCategoryItem({
     super.key,
     required this.benefit,
-    required this.iconSvg,
+    required this.iconSvgName,
   });
 
   @override
@@ -23,45 +23,56 @@ class _BenefitCategoryItemState extends State<BenefitCategoryItem> {
   bool _isExpanded = false;
 
   void _toggleExpansion() {
-    setState(() {
-      _isExpanded = !_isExpanded;
-    });
+    if (widget.benefit.description != null && widget.benefit.description!.isNotEmpty) {
+      setState(() {
+        _isExpanded = !_isExpanded;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 2,
-      shadowColor: Colors.black.withOpacity(0.1),
-      color: AppColors.white,
-      shape: RoundedRectangleBorder(
+    final bool hasDescription = widget.benefit.description != null && widget.benefit.description!.isNotEmpty;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(AppDimens.radius_20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         children: [
-          // Кликабельный заголовок
           ListTile(
             contentPadding: const EdgeInsets.symmetric(
               horizontal: AppDimens.padding_20,
-              vertical: AppDimens.padding_12,
+              vertical: AppDimens.padding_8,
             ),
-            leading: SvgPicture.asset(
-              'assets/icons/${widget.iconSvg}',
+            leading: SizedBox(
+              width: AppDimens.iconSizeLarge,
               height: AppDimens.iconSizeLarge,
-              // Цвет иконки для льгот может отличаться, настраиваем по макету
-              colorFilter: const ColorFilter.mode(AppColors.primary, BlendMode.srcIn),
+              child: SvgPicture.asset(
+                'assets/icons/${widget.iconSvgName}', // <- Вот здесь используется иконка
+                colorFilter: const ColorFilter.mode(AppColors.primary, BlendMode.srcIn),
+              ),
             ),
             title: Text(widget.benefit.title, style: AppTextStyles.h3),
             onTap: _toggleExpansion,
-            trailing: AnimatedRotation(
-              turns: _isExpanded ? 0.5 : 0,
-              duration: const Duration(milliseconds: 200),
-              child: const Icon(Icons.expand_more, color: AppColors.textSecondary),
-            ),
+            trailing: hasDescription
+                ? AnimatedRotation(
+                    turns: _isExpanded ? 0.5 : 0,
+                    duration: const Duration(milliseconds: 200),
+                    child: const Icon(Icons.expand_more, color: AppColors.textSecondary),
+                  )
+                : null,
           ),
-          // Анимированное раскрытие описания
           AnimatedCrossFade(
-            firstChild: Container(), // Пусто, когда свернуто
+            firstChild: Container(),
             secondChild: _buildDescription(),
             crossFadeState: _isExpanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
             duration: const Duration(milliseconds: 300),
@@ -71,21 +82,18 @@ class _BenefitCategoryItemState extends State<BenefitCategoryItem> {
     );
   }
 
-  // Виджет для текстового описания
   Widget _buildDescription() {
-    // Проверяем, есть ли вообще описание
     if (widget.benefit.description == null || widget.benefit.description!.isEmpty) {
       return const SizedBox.shrink();
     }
     return Padding(
-      padding: const EdgeInsets.only(
-        left: AppDimens.padding_20,
-        right: AppDimens.padding_20,
-        bottom: AppDimens.padding_20,
+      padding: const EdgeInsets.fromLTRB(
+        AppDimens.padding_20, 0, AppDimens.padding_20, AppDimens.padding_20
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Divider(color: AppColors.divider, height: 1),
+          const Divider(color: AppColors.divider, height: 1, thickness: 1),
           const SizedBox(height: AppDimens.padding_12),
           Text(
             widget.benefit.description!,

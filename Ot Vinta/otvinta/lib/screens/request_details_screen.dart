@@ -1,6 +1,5 @@
-// lib/screens/request_details_screen.dart
-
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart'; 
 import 'package:otvinta/models/request_model.dart';
 import 'package:otvinta/theme/app_colors.dart';
 import 'package:otvinta/theme/app_dimens.dart';
@@ -9,28 +8,43 @@ import 'package:otvinta/widgets/status_stepper.dart';
 
 class RequestDetailsScreen extends StatelessWidget {
   final RequestModel request;
+  // --- ДОБАВЛЕНО: Принимаем название сервиса ---
+  final String serviceName;
 
-  const RequestDetailsScreen({super.key, required this.request});
+  const RequestDetailsScreen({
+    super.key,
+    required this.request,
+    required this.serviceName,
+  });
+
+  // --- НОВЫЙ МЕТОД: Форматирование даты ---
+  String _formatDate(String isoDate) {
+    try {
+      final dateTime = DateTime.parse(isoDate);
+      return DateFormat('dd.MM.yyyy').format(dateTime);
+    } catch (e) {
+      // Если формат даты некорректный, возвращаем исходную строку
+      return isoDate;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Используем цвет фона из дизайн-системы
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        // Прозрачный AppBar, чтобы был виден цвет фона Scaffold
-        backgroundColor: Colors.transparent,
+        // --- ИЗМЕНЕНИЯ В APPBAR ---
+        backgroundColor: AppColors.background, // Явно указываем цвет фона
         elevation: 0,
-        // Стандартная кнопка "назад" будет стилизована глобальной темой
-        // Убираем автоматическую тень от иконки
-        iconTheme: Theme.of(context).iconTheme.copyWith(color: AppColors.textPrimary),
+        leading: IconButton( // Кастомная кнопка назад для точного вида
+          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Здесь можно вставить ваше лого из ассетов, например:
-            // Image.asset('assets/logo.png', height: 24),
-            // Пока используем иконку-плейсхолдер
-            const Icon(Icons.shield_outlined, color: AppColors.primary, size: AppDimens.iconSizeLarge),
+            // TODO: Замените на ваше лого из ассетов
+            const Icon(Icons.api, color: AppColors.primary, size: AppDimens.iconSizeLarge),
             const SizedBox(width: AppDimens.padding_8),
             Text('Head Ladder', style: AppTextStyles.logo),
           ],
@@ -38,53 +52,48 @@ class RequestDetailsScreen extends StatelessWidget {
         centerTitle: true,
       ),
       body: SingleChildScrollView(
-        // Используем отступы из дизайн-системы
         padding: const EdgeInsets.all(AppDimens.padding_16),
-        child: Card(
-          elevation: 4,
-          shadowColor: Colors.black.withOpacity(0.1),
-          color: AppColors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppDimens.radius_12),
+        child: Container(
+          // --- ИЗМЕНЕНИЯ В КАРТОЧКЕ ---
+          padding: const EdgeInsets.all(AppDimens.padding_24),
+          decoration: BoxDecoration(
+            color: AppColors.white,
+            borderRadius: BorderRadius.circular(AppDimens.radius_20), // Радиус как в макете
+             boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
-          child: Padding(
-            padding: const EdgeInsets.all(AppDimens.padding_24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // ЗАГОЛОВОК "Детали заявки"
-                Text('Детали заявки:', style: AppTextStyles.h2),
-                const SizedBox(height: AppDimens.padding_24),
-
-                // СТРОКА С ID И ДАТОЙ
-                Row(
-                  children: [
-                    _buildInfoColumn('ID заявки:', "M-${request.id}"),
-                    const SizedBox(width: AppDimens.padding_32),
-                    _buildInfoColumn('Дата:', request.date), // TODO: отформатируйте дату, если нужно
-                  ],
-                ),
-                const SizedBox(height: AppDimens.padding_24),
-
-                // СЕКЦИЯ "Описание"
-                _buildInfoColumn('Описание:', request.title),
-                const SizedBox(height: AppDimens.padding_32),
-
-                // ЗАГОЛОВОК "Путь заявки"
-                Text('Путь заявки:', style: AppTextStyles.h2),
-                const SizedBox(height: AppDimens.padding_16),
-
-                // ИНТЕГРАЦИЯ ВИДЖЕТА СТАТУСОВ
-                StatusStepper(currentStatus: request.status),
-              ],
-            ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Детали заявки:', style: AppTextStyles.h2),
+              const SizedBox(height: AppDimens.padding_24),
+              Row(
+                children: [
+                  _buildInfoColumn('ID заявки:', "M-${request.id}"),
+                  const SizedBox(width: AppDimens.padding_32),
+                  // --- ИЗМЕНЕНО: Используем форматирование даты ---
+                  _buildInfoColumn('Дата:', _formatDate(request.date)),
+                ],
+              ),
+              const SizedBox(height: AppDimens.padding_24),
+              // --- ИЗМЕНЕНО: В описании показываем и title, и название сервиса ---
+              _buildInfoColumn('Описание:', '${request.title}\n[$serviceName]'),
+              const SizedBox(height: AppDimens.padding_32),
+              Text('Путь заявки:', style: AppTextStyles.h2),
+              const SizedBox(height: AppDimens.padding_16),
+              StatusStepper(currentStatus: request.status),
+            ],
           ),
         ),
       ),
     );
   }
 
-  /// Вспомогательный виджет для отрисовки колонки "Заголовок-Значение".
   Widget _buildInfoColumn(String title, String value) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
