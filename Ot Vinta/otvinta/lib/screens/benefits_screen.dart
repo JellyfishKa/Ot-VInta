@@ -21,19 +21,27 @@ class _BenefitsScreenState extends State<BenefitsScreen> {
     _benefitsFuture = _apiService.fetchBenefits();
   }
 
-  // Здесь происходит выбор правильной иконки на основе категории
+  // --- ИЗМЕНЕНО: Логика теперь работает с ID категорий, а не с их названиями ---
   String _getIconForBenefit(BenefitModel benefit) {
-    final category = benefit.category;
+    final categoryId = benefit.category; // Получаем ID, например "4"
 
-    switch (category) {
-      case 'Здоровье и спорт':
-        return 'medicine.svg'; // Ваш файл
-      case 'Профессиональное развитие':
-        return 'tabel.svg'; // Ваш файл
-      case 'Финансы и бонусы':
-        return 'balance.svg'; // Ваш файл
+    switch (categoryId) {
+      // TODO: Проверьте, что ID и иконки соответствуют. Если нет - просто поменяйте.
+      // Например, если для ID "4" нужна иконка медицины, напишите: return 'medicine.svg';
+// Предположительно "Профессиональное развитие"
+      case '4': // Предположительно "Профессиональное развитие"
+        return 'tabel.svg';
+
+      case '5': // Предположительно "Финансы и бонусы"
+        return 'balance.svg';
+
+      // Добавим на будущее ID для медицины, если он появится
+      case '6':
+        return 'medicine.svg';
+
       default:
-        return 'bookmark.svg'; // Иконка по умолчанию
+        // Иконка по умолчанию для всех остальных ID
+        return 'bookmark.svg';
     }
   }
 
@@ -51,13 +59,10 @@ class _BenefitsScreenState extends State<BenefitsScreen> {
         if (!snapshot.hasData || snapshot.data!.isEmpty) {
           return const Center(child: Text('Доступных льгот и программ нет.'));
         }
-
         final benefits = snapshot.data!.where((b) => b.isActive).toList();
-        
         if (benefits.isEmpty) {
           return const Center(child: Text('В данный момент нет активных льгот.'));
         }
-
         return ListView.separated(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
           itemCount: benefits.length,
@@ -65,7 +70,6 @@ class _BenefitsScreenState extends State<BenefitsScreen> {
             final benefit = benefits[index];
             return BenefitCategoryItem(
               benefit: benefit,
-              // Передаем правильное имя иконки в виджет
               iconSvgName: _getIconForBenefit(benefit),
             );
           },
