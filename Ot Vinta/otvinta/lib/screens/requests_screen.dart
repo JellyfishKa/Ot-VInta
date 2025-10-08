@@ -1,98 +1,106 @@
-// lib/screens/request_details_screen.dart
-
 import 'package:flutter/material.dart';
 import 'package:otvinta/models/request_model.dart';
-import 'package:otvinta/theme/app_colors.dart';
-import 'package:otvinta/theme/app_dimens.dart';
-import 'package:otvinta/theme/app_text_styles.dart';
-import 'package:otvinta/widgets/status_stepper.dart';
+import 'package:otvinta/screens/request_details_screen.dart';
+import '../widgets/request_list_item.dart';
+import '../theme/app_dimens.dart';
+import '../theme/app_text_styles.dart';
+import '../theme/app_colors.dart';
 
-class RequestDetailsScreen extends StatelessWidget {
-  final RequestModel request;
+class RequestsScreen extends StatelessWidget {
+  final List<RequestModel> requests;
+  final Function(int) onDeleteRequest; // ID теперь int
 
-  const RequestDetailsScreen({super.key, required this.request});
+  const RequestsScreen({
+    super.key,
+    required this.requests,
+    required this.onDeleteRequest,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      // Используем цвет фона из дизайн-системы
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        // Прозрачный AppBar, чтобы был виден цвет фона Scaffold
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        // Стандартная кнопка "назад" будет стилизована глобальной темой
-        // Убираем автоматическую тень от иконки
-        iconTheme: Theme.of(context).iconTheme.copyWith(color: AppColors.textPrimary),
-        title: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Здесь можно вставить ваше лого из ассетов, например:
-            // Image.asset('assets/logo.png', height: 24),
-            // Пока используем иконку-плейсхолдер
-            const Icon(Icons.shield_outlined, color: AppColors.primary, size: AppDimens.iconSizeLarge),
-            const SizedBox(width: AppDimens.padding_8),
-            Text('Head Ladder', style: AppTextStyles.logo),
-          ],
-        ),
-        centerTitle: true,
-      ),
-      body: SingleChildScrollView(
-        // Используем отступы из дизайн-системы
-        padding: const EdgeInsets.all(AppDimens.padding_16),
-        child: Card(
-          elevation: 4,
-          shadowColor: Colors.black.withOpacity(0.1),
-          color: AppColors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppDimens.radius_12),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(AppDimens.padding_24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // ЗАГОЛОВОК "Детали заявки"
-                Text('Детали заявки:', style: AppTextStyles.h2),
-                const SizedBox(height: AppDimens.padding_24),
+    if (requests.isEmpty) {
+      return _buildEmptyState(context);
+    }
 
-                // СТРОКА С ID И ДАТОЙ
-                Row(
-                  children: [
-                    _buildInfoColumn('ID заявки:', "M-${request.id}"),
-                    const SizedBox(width: AppDimens.padding_32),
-                    _buildInfoColumn('Дата:', request.date), // TODO: отформатируйте дату, если нужно
-                  ],
+    return ListView.separated(
+      padding: const EdgeInsets.all(AppDimens.padding_16),
+      itemCount: requests.length,
+      itemBuilder: (context, index) {
+        final request = requests[index];
+       
+        // Оборачиваем нашу красивую карточку в Dismissible
+        return Dismissible(
+          key: Key(request.id.toString()),
+          direction: DismissDirection.startToEnd,
+          onDismissed: (direction) {
+            // Вызываем callback, передавая числовой ID
+            onDeleteRequest(request.id);
+          },
+          // Фон при свайпе (теперь тоже стилизованный)
+          background: _buildDismissibleBackground(),
+          child: RequestListItem(
+            request: request,
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  // Передаем весь объект request на экран деталей
+                  builder: (context) => RequestDetailsScreen(request: request),
                 ),
-                const SizedBox(height: AppDimens.padding_24),
-
-                // СЕКЦИЯ "Описание"
-                _buildInfoColumn('Описание:', request.title),
-                const SizedBox(height: AppDimens.padding_32),
-
-                // ЗАГОЛОВОК "Путь заявки"
-                Text('Путь заявки:', style: AppTextStyles.h2),
-                const SizedBox(height: AppDimens.padding_16),
-
-                // ИНТЕГРАЦИЯ ВИДЖЕТА СТАТУСОВ
-                StatusStepper(currentStatus: request.status),
-              ],
-            ),
+              );
+            },
           ),
-        ),
+        );
+      },
+      separatorBuilder: (context, index) => const SizedBox(height: AppDimens.padding_12),
+    );
+  }
+
+  // Виджет для фона при удалении свайпом
+  Widget _buildDismissibleBackground() {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.error, // Используем цвет ошибки из нашей палитры
+        borderRadius: BorderRadius.circular(AppDimens.radius_20),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: AppDimens.padding_20),
+      alignment: Alignment.centerLeft,
+      child: Row(
+        children: [
+          const Icon(Icons.delete_outline, color: AppColors.white),
+          const SizedBox(width: AppDimens.padding_8),
+          Text(
+            'Удалить',
+            // Используем стиль для кнопок, так как он подходит по цвету и насыщенности
+            style: AppTextStyles.buttonPrimary,
+          ),
+        ],
       ),
     );
   }
 
-  /// Вспомогательный виджет для отрисовки колонки "Заголовок-Значение".
-  Widget _buildInfoColumn(String title, String value) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(title, style: AppTextStyles.caption),
-        const SizedBox(height: AppDimens.padding_4),
-        Text(value, style: AppTextStyles.h3),
-      ],
+  // Виджет для пустого состояния, как в макете
+  Widget _buildEmptyState(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(AppDimens.padding_24),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.stretch, // Растягиваем кнопку на всю ширину
+        children: [
+          Text(
+            'У вас нет активных заявок :(',
+            style: AppTextStyles.h3,
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: AppDimens.padding_24),
+          ElevatedButton(
+            onPressed: () {
+              // TODO: Обсудить с командой, какое действие здесь должно быть.
+              // Возможно, переход на экран "Сервисы" для создания новой заявки.
+            },
+            child: const Text('Вернуться назад'),
+          ),
+        ],
+      ),
     );
   }
 }

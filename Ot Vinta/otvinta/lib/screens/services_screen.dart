@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
-import '../models/service_model.dart';
-import '../services/api_service.dart';
-import '../widgets/service_list_item.dart'; 
-import '../theme/app_dimens.dart';
+import 'package:collection/collection.dart';
+import 'package:otvinta/models/service_model.dart';
+import 'package:otvinta/services/api_service.dart';
+import 'package:otvinta/theme/app_colors.dart';
+import 'package:otvinta/theme/app_dimens.dart';
+import 'package:otvinta/theme/app_text_styles.dart';
+import 'package:otvinta/widgets/service_category_item.dart';
 
 class ServicesScreen extends StatefulWidget {
   final Function(ServiceModel) onServiceTap;
@@ -23,55 +26,96 @@ class _ServicesScreenState extends State<ServicesScreen> {
     _servicesFuture = _apiService.fetchServices();
   }
 
+  // --- МАППИНГ ДАННЫХ ---
+  // Превращаем ID категории в название
+  String _getCategoryNameById(String categoryId) {
+    switch (categoryId) {
+      case '1': // Предполагаем, что 1 - это IT
+        return 'IT-поддержка';
+      case '2': // Предполагаем, что 2 - это HR
+        return 'HR-отдел';
+      case '3': // Добавим на будущее
+        return 'Административный отдел';
+      default:
+        return 'Прочее';
+    }
+  }
+
+  // Превращаем ID категории в имя SVG-файла иконки
+  String _getIconSvgForCategoryById(String categoryId) {
+    switch (categoryId) {
+      case '1':
+        return 'computer.svg';
+      case '2':
+        return 'tabel.svg'; // Используем иконку из ваших ассетов
+      case '3':
+        return 'calendar.svg';
+      default:
+        return 'list.svg';
+    }
+  }
+  // -------------------------
+
   @override
   Widget build(BuildContext context) {
-    // Получаем тему для доступа к цветам (например, для ошибки)
-    final theme = Theme.of(context);
+    // Убираем лишний Scaffold. HomeScreen предоставляет свой.
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: AppDimens.padding_16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: AppDimens.padding_16),
+          Text('Доступные сервисы', style: AppTextStyles.h1),
+          const SizedBox(height: AppDimens.padding_8),
+          Text(
+            'Выберите категорию для просмотра подробной информации',
+            style: AppTextStyles.caption.copyWith(fontSize: 16),
+          ),
+          const SizedBox(height: AppDimens.padding_24),
 
-    return FutureBuilder<List<ServiceModel>>(
-      future: _servicesFuture,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
+          Expanded(
+            child: FutureBuilder<List<ServiceModel>>(
+              future: _servicesFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (snapshot.hasError) {
+                  return Center(child: Text('Ошибка: ${snapshot.error}'));
+                }
+                if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return const Center(child: Text('Услуги не найдены.'));
+                }
 
-        if (snapshot.hasError) {
-          return Center(
-            child: Padding(
-              padding: const EdgeInsets.all(AppDimens.padding_16),
-              child: Text(
-                'Ошибка загрузки услуг: ${snapshot.error}',
-                textAlign: TextAlign.center,
-                // Используем стиль из темы и цвет ошибки
-                style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.error),
-              ),
+                final services = snapshot.data!;
+                // Группируем по-прежнему по ID, так как он уникален
+                final groupedServices = groupBy(
+                  services,
+                  (ServiceModel service) => service.category ?? 'unknown',
+                );
+                final categoryIds = groupedServices.keys.toList();
+
+                return ListView.separated(
+                  itemCount: categoryIds.length,
+                  itemBuilder: (context, index) {
+                    final categoryId = categoryIds[index];
+                    final servicesInCategory = groupedServices[categoryId]!;
+                    
+                    return ServiceCategoryItem(
+                      // Используем наши новые функции для получения правильных данных
+                      categoryTitle: _getCategoryNameById(categoryId),
+                      categoryIconSvg: _getIconSvgForCategoryById(categoryId),
+                      services: servicesInCategory,
+                      onServiceTap: widget.onServiceTap,
+                    );
+                  },
+                  separatorBuilder: (context, index) => const SizedBox(height: AppDimens.padding_12),
+                );
+              },
             ),
-          );
-        }
-
-        if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Center(child: Text('Доступные услуги отсутствуют.'));
-        }
-
-        final services = snapshot.data!;
-
-        // Используем ListView.separated для автоматического добавления отступов между элементами
-        return ListView.separated(
-          // Используем стандартные отступы из нашей дизайн-системы
-          padding: const EdgeInsets.all(AppDimens.padding_16),
-          itemCount: services.length,
-          itemBuilder: (context, index) {
-            final service = services[index];
-            // --- ГЛАВНОЕ ИЗМЕНЕНИЕ: Используем наш кастомный виджет ---
-            return ServiceListItem(
-              service: service,
-              onTap: () => widget.onServiceTap(service),
-            );
-          },
-          // Виджет-разделитель (здесь просто пустой отступ)
-          separatorBuilder: (context, index) => const SizedBox(height: AppDimens.padding_8),
-        );
-      },
+          ),
+        ],
+      ),
     );
   }
 }
