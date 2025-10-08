@@ -7,31 +7,32 @@ from core.models import User, Services, Benefit, Request, Category
 class UserAdmin(BaseUserAdmin):
     list_display = (
         'id', 'username', 'email', 'department',
-        'employee_id', 'is_staff', 'is_active')
-    list_filter = ('is_staff', 'is_active', 'department', 'employee_id')
+        'employee_id', 'is_staff', 'is_active'
+    )
+    list_filter = ('is_staff', 'is_active', 'department')
     search_fields = ('username', 'email', 'department', 'employee_id')
     ordering = ('id',)
+
     fieldsets = (
-        ('Employee Info', {
+        ('Информация о сотруднике', {
             'fields': ('employee_id', 'department'),
         }),
-        ('Authentication', {
+        ('Аутентификация', {
             'fields': ('username', 'password'),
         }),
-        ('Personal info', {
+        ('Личные данные', {
             'fields': ('first_name', 'last_name', 'email'),
         }),
-        ('Permissions', {
+        ('Права доступа', {
             'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions'),
         }),
-        ('Important dates', {
+        ('Важные даты', {
             'fields': ('last_login', 'date_joined'),
         }),
     )
 
-    # Also adjust add form
     add_fieldsets = (
-        (None, {
+        ('Создание пользователя', {
             'classes': ('wide',),
             'fields': (
                 'username', 'password1', 'password2',
@@ -40,6 +41,7 @@ class UserAdmin(BaseUserAdmin):
             ),
         }),
     )
+
 
 @admin.register(Services)
 class ServicesAdmin(admin.ModelAdmin):
@@ -50,11 +52,11 @@ class ServicesAdmin(admin.ModelAdmin):
 
     def make_active(self, request, queryset):
         queryset.update(is_active=True)
-    make_active.short_description = "Mark selected Services as active"
+    make_active.short_description = "Сделать выбранные услуги активными"
 
     def make_inactive(self, request, queryset):
         queryset.update(is_active=False)
-    make_inactive.short_description = "Mark selected services as inactive"
+    make_inactive.short_description = "Сделать выбранные услуги неактивными"
 
 
 @admin.register(Benefit)
@@ -66,11 +68,11 @@ class BenefitAdmin(admin.ModelAdmin):
 
     def make_active(self, request, queryset):
         queryset.update(is_active=True)
-    make_active.short_description = "Mark selected benefits as active"
+    make_active.short_description = "Сделать выбранные льготы активными"
 
     def make_inactive(self, request, queryset):
         queryset.update(is_active=False)
-    make_inactive.short_description = "Mark selected benefits as inactive"
+    make_inactive.short_description = "Сделать выбранные льготы неактивными"
 
 
 @admin.register(Request)
@@ -80,11 +82,21 @@ class RequestAdmin(admin.ModelAdmin):
     search_fields = ('user__username', 'service__title')
     list_editable = ('status',)
     ordering = ('-created_at',)
+    readonly_fields = ('created_at', 'updated_at')
+
+    fieldsets = (
+        ('Основная информация', {
+            'fields': ('user', 'service', 'status'),
+        }),
+        ('Системная информация', {
+            'fields': ('created_at', 'updated_at'),
+        }),
+    )
 
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ('id', 'name',)
-    list_filter = ('id', 'name',)
+    list_filter = ('name',)
     search_fields = ('id', 'name',)
     ordering = ('-id',)
