@@ -1,37 +1,30 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:head_ladder/theme/app_colors.dart';
 import 'package:head_ladder/theme/app_dimens.dart';
 import 'package:head_ladder/theme/app_text_styles.dart';
-
+import 'dart:io'; 
+class MyHttpOverrides extends HttpOverrides {
+  @override
+  HttpClient createHttpClient(SecurityContext? context) {
+    return super.createHttpClient(context)
+      ..badCertificateCallback =
+          (X509Certificate cert, String host, int port) => true;
+  }
+}
 class HeadLadderAppBar extends StatelessWidget implements PreferredSizeWidget {
-  final String? title;
   final bool showBackButton;
   final List<Widget>? actions;
-  // --- ДОБАВЛЕНО: Свойство для сложного заголовка ---
   final PreferredSizeWidget? bottom;
 
   const HeadLadderAppBar({
     super.key,
-    this.title,
     this.showBackButton = true,
     this.actions,
-    this.bottom, // --- ДОБАВЛЕНО в конструктор
+    this.bottom,
   });
 
   @override
   Widget build(BuildContext context) {
-    Widget titleWidget;
-    if (title != null && title!.isNotEmpty) {
-      titleWidget = Text(title!, style: AppTextStyles.h2);
-    } else {
-      // Если title не указан, используем логотип
-      titleWidget = SvgPicture.asset(
-        'assets/icons/logo.svg',
-        height: AppDimens.iconSizeXLarge,
-      );
-    }
-
     return AppBar(
       backgroundColor: AppColors.background,
       elevation: 0,
@@ -43,14 +36,28 @@ class HeadLadderAppBar extends StatelessWidget implements PreferredSizeWidget {
               onPressed: () => Navigator.of(context).pop(),
             )
           : null,
-      title: titleWidget,
+      
+      // --- ИЗМЕНЕНО: Жестко задаем логотип + название, как было в вашем дизайне ---
+      title: Row(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          // --- ИЗМЕНЕНО: Используем Image.asset для PNG-файла ---
+          Image.asset(
+            'assets/icons/logo.png', // <-- Путь к новому PNG
+            height: AppDimens.iconSizeLarge,
+            color: AppColors.primary, // <-- Для PNG цвет задается так
+          ),
+          const SizedBox(width: AppDimens.padding_8),
+          Text('Head Ladder', style: AppTextStyles.logo),
+        ],
+      ),
+      
       actions: actions,
-      // --- ДОБАВЛЕНО: Передаем bottom в стандартный AppBar ---
       bottom: bottom,
     );
   }
 
-  // --- ИЗМЕНЕНО: Размер теперь учитывает высоту bottom-виджета ---
   @override
   Size get preferredSize => Size.fromHeight(
       kToolbarHeight + (bottom?.preferredSize.height ?? 0.0));

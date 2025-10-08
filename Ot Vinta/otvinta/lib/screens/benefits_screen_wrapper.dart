@@ -12,15 +12,15 @@ class BenefitsScreenWrapper extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      // --- ИЗМЕНЕНО: Вся логика AppBar теперь в одном месте ---
+      // --- ИСПОЛЬЗУЕМ НАШ ФИНАЛЬНЫЙ APPBAR ---
       appBar: HeadLadderAppBar(
-        // title не указываем, чтобы отображался логотип
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(80.0),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: AppDimens.padding_16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                  Text('Льготы и программы', style: AppTextStyles.h1),
                  const SizedBox(height: AppDimens.padding_8),
@@ -28,7 +28,6 @@ class BenefitsScreenWrapper extends StatelessWidget {
                   'Выберите программу для просмотра подробной информации',
                   style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
                 ),
-                // Убрали лишний отступ снизу, т.к. PreferredSize уже задает высоту
               ],
             ),
           ),

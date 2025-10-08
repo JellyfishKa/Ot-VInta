@@ -7,63 +7,62 @@ import 'package:head_ladder/screens/services_screen_wrapper.dart';
 import 'package:head_ladder/theme/app_colors.dart';
 import 'package:head_ladder/theme/app_dimens.dart';
 import 'package:head_ladder/theme/app_text_styles.dart';
-import 'package:head_ladder/widgets/headladder_app_bar.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Получаем наши фейковые данные
     final user = UserModel.mock();
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      // --- ИЗМЕНЕНО: Используем наш стандартный AppBar без кнопки "назад" ---
-      appBar: const HeadLadderAppBar(
-        showBackButton: false,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: AppDimens.padding_16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const SizedBox(height: AppDimens.padding_16),
-            _buildGreeting(user),
-            const SizedBox(height: AppDimens.padding_32),
-            _buildNavigationButton(
-              context,
-              'Личный кабинет',
-              isPrimary: false,
-              onPressed: () {
-                Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfileScreen()));
-              },
-            ),
-            const SizedBox(height: AppDimens.padding_16),
-            _buildNavigationButton(
-              context,
-              'Мои заявки',
-              onPressed: () {
-                Navigator.push(context, MaterialPageRoute(builder: (_) => const RequestsScreenWrapper()));
-              },
-            ),
-            const SizedBox(height: AppDimens.padding_16),
-            _buildNavigationButton(
-              context,
-              'Льготы и программы',
-              onPressed: () {
-                Navigator.push(context, MaterialPageRoute(builder: (_) => const BenefitsScreenWrapper()));
-              },
-            ),
-            const SizedBox(height: AppDimens.padding_16),
-            _buildNavigationButton(
-              context,
-              'Доступные сервисы',
-              onPressed: () {
-                Navigator.push(context, MaterialPageRoute(builder: (_) => const ServicesScreenWrapper()));
-              },
-            ),
-          ],
+      // --- ИЗМЕНЕНО: AppBar полностью удален с главного экрана, как и должно быть по дизайну ---
+      
+      // --- ИЗМЕНЕНО: Body обернут в SafeArea, чтобы не заходить под статус-бар ---
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppDimens.padding_16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const SizedBox(height: AppDimens.padding_16),
+              _buildGreeting(user),
+              const SizedBox(height: AppDimens.padding_32),
+              _buildNavigationButton(
+                context,
+                'Личный кабинет',
+                isPrimary: false,
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfileScreen()));
+                },
+              ),
+              const SizedBox(height: AppDimens.padding_16),
+              _buildNavigationButton(
+                context,
+                'Мои заявки',
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => const RequestsScreenWrapper()));
+                },
+              ),
+              const SizedBox(height: AppDimens.padding_16),
+              _buildNavigationButton(
+                context,
+                'Льготы и программы',
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => const BenefitsScreenWrapper()));
+                },
+              ),
+              const SizedBox(height: AppDimens.padding_16),
+              _buildNavigationButton(
+                context,
+                'Доступные сервисы',
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => const ServicesScreenWrapper()));
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -84,13 +83,14 @@ class HomeScreen extends StatelessWidget {
         ),
         const SizedBox(width: AppDimens.padding_16),
         CircleAvatar(
-          radius: 36, // Немного увеличим радиус для соответствия макету
+          radius: 36,
           backgroundColor: AppColors.divider,
-
           backgroundImage: (user.avatarUrl != null && user.avatarUrl!.isNotEmpty)
               ? NetworkImage(user.avatarUrl!)
               : null,
-          child: const Icon(Icons.person, color: AppColors.textSecondary, size: 36),
+          child: (user.avatarUrl == null || user.avatarUrl!.isEmpty)
+              ? const Icon(Icons.person, color: AppColors.textSecondary, size: 36)
+              : null,
         ),
       ],
     );

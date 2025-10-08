@@ -12,7 +12,8 @@ dependencies:
     sdk: flutter
 
   google_fonts: ^6.2.1 
-  flutter_svg: ^2.0.10+1
+  flutter_svg: ^2.0.7
+
 
   collection: ^1.19.1
   # --- Пакеты для работы приложения ---
@@ -38,6 +39,7 @@ dev_dependencies:
   
   # Рекомендуемый набор правил для анализатора кода Dart
   flutter_lints: ^3.0.0
+  flutter_launcher_icons: ^0.13.1
 
 flutter:
   uses-material-design: true
@@ -51,3 +53,9 @@ flutter:
     - assets/images/
     - assets/icons/
     - assets/launcher_icon/
+
+flutter_launcher_icons:
+  android: "launcher_icon" # Имя иконки по умолчанию
+  ios: true
+  image_path: "assets/launcher_icon/icon.png" # <-- УКАЖИТЕ ПУТЬ К ВАШЕЙ ИКОНКЕ
+  min_sdk_android: 21

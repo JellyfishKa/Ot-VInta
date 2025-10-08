@@ -5,28 +5,28 @@ import 'package:head_ladder/screens/services_screen.dart';
 import 'package:head_ladder/theme/app_colors.dart';
 import 'package:head_ladder/widgets/headladder_app_bar.dart';
 
-
+// --- Убедитесь, что имя класса ТОЧНО такое ---
 class ServicesScreenWrapper extends StatelessWidget {
   const ServicesScreenWrapper({super.key});
 
   @override
   Widget build(BuildContext context) {
-     void onServiceTap(ServiceModel service) async {
-        final result = await Navigator.of(context).push<bool>(
-          MaterialPageRoute(
-            builder: (context) => CreateRequestScreen(service: service),
-          ),
-        );
-        if(result == true && context.mounted) {
-            Navigator.of(context).pop();
-        }
+    void onServiceTap(ServiceModel service) async {
+      final result = await Navigator.of(context).push<bool>(
+        MaterialPageRoute(
+          builder: (context) => CreateRequestScreen(service: service),
+        ),
+      );
+      if (result == true && context.mounted) {
+        Navigator.of(context).pop();
+      }
     }
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      // --- ИЗМЕНЕНО: Стандартный AppBar заменен на наш кастомный ---
+      // Используем наш универсальный AppBar
       appBar: const HeadLadderAppBar(
-        title: 'Доступные сервисы',
+        // title не указываем, чтобы был логотип в центре
       ),
       body: ServicesScreen(onServiceTap: onServiceTap),
     );
