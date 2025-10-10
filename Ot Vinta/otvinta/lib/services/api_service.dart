@@ -13,6 +13,7 @@ class ApiService {
   final String _benefitsPath = dotenv.env['BENEFITS_PATH']!;
   final String _requestsPath = dotenv.env['REQUESTS_PATH']!;
   final String _profilePath = '/api/users/me/';
+  final String _deleteRequestPath = dotenv.env['DELETE_REQUEST_PATH']!;
 
   Map<String, String> _getHeaders() {
     return {
@@ -76,10 +77,11 @@ class ApiService {
   }
   
   // --- ИЗМЕНЕНО: Исправление логики удаления ---
-  Future<void> deleteRequest(int id) async { // Принимаем int
-    // Убираем /delete, стандартный REST эндпоинт - DELETE /api/requests/{id}/
-    final url = Uri.parse('$_baseUrl$_requestsPath$id/'); 
+  Future<void> deleteRequest(int id) async { 
+    final url = Uri.parse('$_baseUrl$_requestsPath$id/delete'); 
     final response = await http.delete(url, headers: _getHeaders());
+    print('Response status: ${response.statusCode}');
+    print('Response body: ${response.body}');
 
     if (response.statusCode != 204) { 
       throw Exception('Не удалось удалить заявку. Код ответа: ${response.statusCode}, Тело: ${response.body}');
